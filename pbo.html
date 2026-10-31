@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi CRUD PBO / OOP JavaScript</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 650px; display: none; }
+        .active { display: block; }
+        h2 { margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:disabled { background-color: #e9ecef; }
+        button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; color: white; margin-right: 5px; margin-top: 5px; }
+        .btn-primary { background-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: left; font-size: 14px; }
+        th { background-color: #f8f9fa; }
+        tr:hover { background-color: #f1f1f1; cursor: pointer; }
+        .demo-box { background: #e8f4fd; padding: 10px; border-radius: 4px; font-size: 13px; margin-top: 15px; border-left: 4px solid #007bff; }
+        .role-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #e2e3e5; color: #383d41; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 1. FORM LOGIN ================= -->
+    <div id="loginForm" class="container active">
+        <h2>Sistem Login (OOP)</h2>
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="loginUser" placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="loginPass" placeholder="Masukkan password">
+        </div>
+        <button class="btn-primary" onclick="AuthManager.login()">Login</button>
+        
+        <div class="demo-box">
+            <b>Akun Demo:</b><br>
+            • Admin: <code>admin</code> / <code>admin123</code><br>
+            • User: <code>user1</code> / <code>user123</code>
+        </div>
+    </div>
+
+    <!-- ================= 2. FORM PROFILE ================= -->
+    <div id="profileForm" class="container">
+        <h2>Profil Pengguna</h2>
+        <div class="form-group">
+            <label>Role:</label>
+            <span id="profileRoleBadge" class="role-badge">-</span>
+        </div>
+        <div class="form-group">
+            <label>Username (Kunci Utama):</label>
+            <input type="text" id="profileUsername" disabled>
+        </div>
+        <div class="form-group">
+            <label>Nama Lengkap:</label>
+            <input type="text" id="profileFullName">
+        </div>
+        <div class="form-group">
+            <label>Password Baru:</label>
+            <input type="password" id="profilePassword">
+        </div>
+        <button class="btn-primary" onclick="ProfileManager.save()">Simpan Perubahan</button>
+        <button id="btnNavTable" class="btn-success" style="display:none;" onclick="AppRouter.showTable()">Kelola User (Admin)</button>
+        <button class="btn-danger" onclick="AuthManager.logout()">Logout</button>
+    </div>
+
+    <!-- ================= 3. FORM TABLE USER (CRUD ADMIN) ================= -->
+    <div id="tableForm" class="container" style="max-width: 800px;">
+        <h2>Kelola Data User (CRUD Admin)</h2>
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+                <label>Username:</label>
+                <input type="text" id="crudUsername" placeholder="Username unik">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Password:</label>
+                <input type="text" id="crudPassword" placeholder="Password">
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+                <label>Nama Lengkap:</label>
+                <input type="text" id="crudFullName" placeholder="Nama lengkap">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Role:</label>
+                <select id="crudRole">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+        </div>
+        
+        <div>
+            <button class="btn-success" onclick="CrudManager.add()">Tambah User</button>
+            <button class="btn-warning" onclick="CrudManager.update()">Update Terpilih</button>
+            <button class="btn-danger" onclick="CrudManager.remove()">Hapus Terpilih</button>
+            <button class="btn-secondary" onclick="CrudManager.clear()">Clear Form</button>
+            <button class="btn-primary" onclick="AppRouter.showProfile()">Profil Saya</button>
+            <button class="btn-danger" style="float: right;" onclick="AuthManager.logout()">Logout</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Nama Lengkap</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- Data injected via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================= JAVASCRIPT: OOP & STORAGE ================= -->
+    <script>
+        // --- 1. ENKAPSULASI & PEWARISAN (INHERITANCE) ---
+        class User {
+            constructor(username, password, fullName, role = "user") {
+                this.username = username;
+                this.password = password;
+                this.fullName = fullName;
+                this.role = role;
+            }
+
+            toJSON() {
+                return {
+                    username: this.username,
+                    password: this.password,
+                    fullName: this.fullName,
+                    role: this.role
+                };
+            }
+        }
+
+        // Inheritance: AdminUser mewarisi User
+        class AdminUser extends User {
+            constructor(username, password, fullName) {
+                super(username, password, fullName, "admin");
+            }
+        }
+
+        // Inheritance: RegularUser mewarisi User
+        class RegularUser extends User {
+            constructor(username, password, fullName) {
+                super(username, password, fullName, "user");
+            }
+        }
+
+        // --- 2. LOCAL DATA STORAGE MANAGER ---
+        class StorageManager {
+            static STORAGE_KEY = "oop_crud_users_db";
+
+            static init() {
+                if (!localStorage.getItem(this.STORAGE_KEY)) {
+                    const defaultData = [
+                        new AdminUser("admin", "admin123", "Administrator Utama"),
+                        new RegularUser("user1", "user123", "Denis Endriyani")
+                    ];
+                    this.save(defaultData);
+                }
+            }
+
+            static getUsers() {
+                this.init();
+                const raw = JSON.parse(localStorage.getItem(this.STORAGE_KEY));
+                return raw.map(u => u.role === 'admin' ? new AdminUser(u.username, u.password, u.fullName) : new RegularUser(u.username, u.password, u.fullName));
+            }
+
+            static save(users) {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users.map(u => u.toJSON())));
+            }
+        }
+
+        // State Aplikasi Global
+        let currentUser = null;
+
+        // --- 3. ROUTER / NAVIGASI FORM ---
+        class AppRouter {
+            static showForm(formId) {
+                document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
+                document.getElementById(formId).classList.add('active');
+            }
+
+            static showLogin() {
+                currentUser = null;
+                this.showForm('loginForm');
+            }
+
+            static showProfile() {
+                document.getElementById('profileUsername').value = currentUser.username;
+                document.getElementById('profileFullName').value = currentUser.fullName;
+                document.getElementById('profilePassword').value = currentUser.password;
+                
+                const badge = document.getElementById('profileRoleBadge');
+                badge.innerText = currentUser.role.toUpperCase();
+                badge.style.background = currentUser.role === 'admin' ? '#d4edda' : '#cce5ff';
+                badge.style.color = currentUser.role === 'admin' ? '#155724' : '#004085';
+
+                // Tampilkan tombol kelola user jika role admin
+                const btnNav = document.getElementById('btnNavTable');
+                btnNav.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
+
+                this.showForm('profileForm');
+            }
+
+            static showTable() {
+                if (currentUser.role !== 'admin') {
+                    alert("Akses ditolak! Hanya untuk admin.");
+                    return;
+                }
+                CrudManager.loadTable();
+                this.showForm('tableForm');
+            }
+        }
+
+        // --- 4. AUTHENTICATION MANAGER ---
+        class AuthManager {
+            static login() {
+                const uInput = document.getElementById('loginUser').value;
+                const pInput = document.getElementById('loginPass').value;
+
+                const users = StorageManager.getUsers();
+                const found = users.find(u => u.username === uInput && u.password === pInput);
+
+                if (found) {
+                    currentUser = found;
+                    document.getElementById('loginUser').value = '';
+                    document.getElementById('loginPass').value = '';
+                    
+                    if (currentUser.role === 'admin') {
+                        AppRouter.showTable();
+                    } else {
+                        AppRouter.showProfile();
+                    }
+                } else {
+                    alert("Username atau Password salah!");
+                }
+            }
+
+            static logout() {
+                AppRouter.showLogin();
+            }
+        }
+
+        // --- 5. PROFILE MANAGER ---
+        class ProfileManager {
+            static save() {
+                const newName = document.getElementById('profileFullName').value;
+                const newPass = document.getElementById('profilePassword').value;
+
+                if (!newName || !newPass) {
+                    alert("Nama dan Password tidak boleh kosong!");
+                    return;
+                }
+
+                let users = StorageManager.getUsers();
+                users = users.map(u => {
+                    if (u.username === currentUser.username) {
+                        u.fullName = newName;
+                        u.password = newPass;
+                        currentUser = u;
+                    }
+                    return u;
+                });
+
+                StorageManager.save(users);
+                alert("Profil berhasil diperbarui!");
+            }
+        }
+
+        // --- 6. CRUD MANAGER (ADMIN DASHBOARD) ---
+        class CrudManager {
+            static loadTable() {
+                const tbody = document.getElementById('userTableBody');
+                tbody.innerHTML = '';
+                const users = StorageManager.getUsers();
+
+                users.forEach(u => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${u.username}</td>
+                        <td>${u.fullName}</td>
+                        <td><span class="role-badge" style="background:${u.role==='admin'?'#d4edda':'#cce5ff'}">${u.role.toUpperCase()}</span></td>
+                    `;
+                    row.onclick = () => this.selectRow(u);
+                    tbody.appendChild(row);
+                });
+            }
+
+            static selectRow(user) {
+                document.getElementById('crudUsername').value = user.username;
+                document.getElementById('crudUsername').disabled = true; // Kunci primary key
+                document.getElementById('crudPassword').value = user.password;
+                document.getElementById('crudFullName').value = user.fullName;
+                document.getElementById('crudRole').value = user.role;
+            }
+
+            static clear() {
+                document.getElementById('crudUsername').value = '';
+                document.getElementById('crudUsername').disabled = false;
+                document.getElementById('crudPassword').value = '';
+                document.getElementById('crudFullName').value = '';
+                document.getElementById('crudRole').value = 'user';
+            }
+
+            static add() {
+                const uname = document.getElementById('crudUsername').value;
+                const pass = document.getElementById('crudPassword').value;
+                const fname = document.getElementById('crudFullName').value;
+                const role = document.getElementById('crudRole').value;
+
+                if (!uname || !pass || !fname) {
+                    alert("Semua field wajib diisi!");
+                    return;
+                }
+
+                let users = StorageManager.getUsers();
+                if (users.some(u => u.username === uname)) {
+                    alert("Username sudah terdaftar!");
+                    return;
+                }
+
+                // Polimorfisme pembuatan objek berdasarkan role
+                const newUser = role === 'admin' ? new AdminUser(uname, pass, fname) : new RegularUser(uname, pass, fname);
+                users.push(newUser);
+                StorageManager.save(users);
+
+                this.loadTable();
+                this.clear();
+                alert("User berhasil ditambahkan!");
+            }
+
+            static update() {
+                const uname = document.getElementById('crudUsername').value;
+                const pass = document.getElementById('crudPassword').value;
+                const fname = document.getElementById('crudFullName').value;
+                const role = document.getElementById('crudRole').value;
+
+                if (!document.getElementById('crudUsername').disabled) {
+                    alert("Pilih baris user dari tabel terlebih dahulu!");
+                    return;
+                }
+
+                let users = StorageManager.getUsers();
+                users = users.map(u => {
+                    if (u.username === uname) {
+                        u.password = pass;
+                        u.fullName = fname;
+                        u.role = role;
+                    }
+                    return u;
+                });
+
+                StorageManager.save(users);
+                this.loadTable();
+                this.clear();
+                alert("Data user berhasil diperbarui!");
+            }
+
+            static remove() {
+                const uname = document.getElementById('crudUsername').value;
+                if (!document.getElementById('crudUsername').disabled) {
+                    alert("Pilih baris user dari tabel yang ingin dihapus!");
+                    return;
+                }
+
+                if (uname === currentUser.username) {
+                    alert("Tidak dapat menghapus akun yang sedang aktif digunakan!");
+                    return;
+                }
+
+                if (confirm(`Hapus user ${uname}?`)) {
+                    let users = StorageManager.getUsers();
+                    users = users.filter(u => u.username !== uname);
+                    StorageManager.save(users);
+                    this.loadTable();
+                    this.clear();
+                    alert("User berhasil dihapus!");
+                }
+            }
+        }
+
+        // Inisialisasi Storage Saat Pertama Kali Dimuat
+        StorageManager.init();
+    </script>
+</body>
+</html>
